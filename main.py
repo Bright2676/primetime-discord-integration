@@ -20,10 +20,27 @@ bot = commands.Bot(command_prefix="$", intents=intents)
 def update_status():
     data = request.json
     status_text = data.get("status", "Idle")
-    game = discord.Game(name=status_text)
-    bot.loop.create_task(bot.change_presence(status=discord.Status.online, activity=game))
-
+    asyncio.run_coroutine_threadsafe(
+        bot.change_presence(status=discord.Status.online, activity=discord.Game(name=status_text)),
+        bot.loop
+    )
     return {"message": "Status updated"}, 200
+
+@app.route("/player/join", methods=["POST"])
+def player_join():
+    data = request.json
+    nickname = data.get("Nickname")
+    user_id = data.get("UserId")
+
+    channel_id = 1419504760482037883
+    channel = bot.get_channel(channel_id)
+    if channel:
+        asyncio.run_coroutine_threadsafe(
+            channel.send(f"Player joined: {nickname} ({user_id})"),
+            bot.loop
+        )
+
+    return {"message": "Player join posted"}, 200
 
 @bot.event
 async def on_ready():
@@ -33,7 +50,7 @@ async def on_ready():
 async def load_cmds():
     for file in os.listdir("./commands"):
         if file.endswith(".py"):
-            await bot.load_extension(f"commands.{file[:-3]}") # :3
+            await bot.load_extension(f"commands.{file[:-3]}")
 
 def run_flask():
     app.run(host="0.0.0.0", port=5000)
