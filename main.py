@@ -40,7 +40,36 @@ def player_join():
             bot.loop
         )
 
+    status_game = discord.Game(f"{player_count}/{max_players}")
+    asyncio.run_coroutine_threadsafe(
+        bot.change_presence(status=discord.Status.online, activity=status_game),
+        bot.loop
+    )
+
     return {"message": "Player join posted"}, 200
+
+@app.route("/player/leave", methods=["POST"])
+def player_leave():
+    data = request.json
+    nickname = data.get("Nickname")
+    player_count = data.get("PlayerCount", 0)
+    max_players = data.get("MaxPlayers", 0)
+
+    channel_id = 1419504760482037883
+    channel = bot.get_channel(channel_id)
+    if channel:
+        asyncio.run_coroutine_threadsafe(
+            channel.send(f"Player left: {nickname} - Players: {player_count}/{max_players}"),
+            bot.loop
+        )
+
+        status_game = discord.Game(f"{player_count}/{max_players}")
+        asyncio.run_coroutine_threadsafe(
+            bot.change_presence(status=discord.Status.online, activity=status_game),
+            bot.loop
+        )
+
+    return {"message": "Player leave posted"}, 200
 
 @bot.event
 async def on_ready():
