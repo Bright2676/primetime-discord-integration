@@ -29,14 +29,14 @@ def update_status():
 @app.route("/player/join", methods=["POST"])
 def player_join():
     data = request.json
-    nickname = data.get("Nickname")
-    user_id = data.get("UserId")
+    player_count = data["PlayerCount"]
+    max_players = data["MaxPlayers"]
 
     channel_id = 1419504760482037883
     channel = bot.get_channel(channel_id)
     if channel:
         asyncio.run_coroutine_threadsafe(
-            channel.send(f"Player joined: {nickname} ({user_id})"),
+            channel.send(f"Player count: {player_count}\nMax players: {max_players}"),
             bot.loop
         )
 
